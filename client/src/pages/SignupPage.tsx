@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom"; // For redirection
 import axios from "axios"; // For API calls
 import AuthLayout from "../components/AuthLayout";
-import { Eye, EyeOff, Calendar } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 // Configure axios to send cookies with requests
 const api = axios.create({
