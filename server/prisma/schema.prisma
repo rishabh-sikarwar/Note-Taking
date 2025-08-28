@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -19,6 +18,7 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
+  name      String
   email     String   @unique
   password  String // This will store the hashed password
 

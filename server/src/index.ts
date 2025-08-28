@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
+import notesRoutes from "./routes/notesRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(cookieParser()); // To parse cookies from requests
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/notes' , notesRoutes)
 
 // Simple test route
 app.get("/api/health", (req, res) => {
