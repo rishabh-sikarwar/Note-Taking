@@ -7,7 +7,7 @@ import { Eye, EyeOff, Calendar } from "lucide-react";
 
 // Configure axios to send cookies with requests
 const api = axios.create({
-  baseURL: "http://localhost:8000/api", // Your backend URL
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
   withCredentials: true,
 });
 
