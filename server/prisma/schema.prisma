@@ -19,10 +19,16 @@ model User {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
   name      String
-  email     String   @unique
-  password  String // This will store the hashed password
-
+  email     String   @unique  
+  dateOfBirth DateTime?
   notes     Note[]
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  email     String   @unique // The user's email
+  token     String   // The hashed OTP
+  expiresAt DateTime // When the token expires
 }
 
 // Note model for the note-taking functionality

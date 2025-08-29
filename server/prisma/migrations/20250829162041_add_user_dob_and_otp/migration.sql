@@ -1,0 +1,11 @@
+/*
+  Warnings:
+
+  - You are about to drop the column `password` on the `User` table. All the data in the column will be lost.
+
+*/
+-- AlterTable
+ALTER TABLE "public"."User" DROP COLUMN "password",
+ADD COLUMN     "dateOfBirth" TIMESTAMP(3),
+ADD COLUMN     "otp" TEXT,
+ADD COLUMN     "otpExpiresAt" TIMESTAMP(3);

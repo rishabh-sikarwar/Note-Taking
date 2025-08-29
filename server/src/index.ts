@@ -12,9 +12,14 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 // Middleware Setup
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://note-taking-gilt.vercel.app", // Your Vercel URL from the error message
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // Your frontend URL
+    origin: allowedOrigins, // Your frontend URL
     credentials: true, // Allows cookies to be sent
   })
 );
