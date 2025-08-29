@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 8000;
 // Middleware Setup
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://note-taking-gilt.vercel.app/", // Your Vercel URL from the error message
+  "https://note-taking-gilt.vercel.app",
 ];
 
 app.use(
