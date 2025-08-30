@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import notesRoutes from "./routes/notesRoutes.js";
+import debugRoutes from "./routes/debugRoutes.js";
 
 import passport from "passport";
 import "./config/passport.js";
@@ -32,7 +33,8 @@ app.use(passport.initialize()); // Initialize Passport.js
 
 // API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/notes' , notesRoutes)
+app.use('/api/notes', notesRoutes);
+app.use('/api/debug', debugRoutes);
 
 // Simple test route
 app.get("/api/health", (req, res) => {
