@@ -7,10 +7,6 @@ import { cookieOptions, logoutCookieOptions } from "../utils/cookieOptions.js";
 
 
 
-
-
-
-
 // Step 1 for Signup: Send OTP
 export const sendSignupOTP = async (req: Request, res: Response) => {
   const { email } = req.body;
