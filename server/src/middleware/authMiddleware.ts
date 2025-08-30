@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 declare global {
   namespace Express {
     interface Request {
-      user?: { userId: string };
+      id: string;
     }
   }
 }
@@ -20,11 +20,11 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
+      id: string;
     };
 
     // Attach user to the request
-    req.user = { userId: decoded.userId };
+    req.user = { id: decoded.id };
     next(); // Move on to the next function (our controller)
   } catch (error) {
     res.status(401).json({ message: "Not authorized, token failed" });
