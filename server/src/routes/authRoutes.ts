@@ -28,17 +28,37 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 // Route for Google to redirect to after authentication
 router.get(
   '/google/callback',
-  passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL}/login`, session: false }),
+  (req, res, next) => {
+    const failureRedirect = `${process.env.FRONTEND_URL}/login`;
+    passport.authenticate('google', { 
+      failureRedirect, 
+      session: false 
+    })(req, res, next);
+  },
   (req, res) => {
-    // On successful authentication, Passport attaches the user to req.user
-    const user = req.user as any; 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: '1h',
-    });
-    res.cookie('token', token, cookieOptions);
-    
-    // Redirect to the frontend dashboard
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    try {
+      // On successful authentication, Passport attaches the user to req.user
+      const user = req.user as any;
+      
+      if (!user) {
+        console.error('No user found in req.user after Google OAuth');
+        return res.redirect(`${process.env.FRONTEND_URL}/login?error=authentication_failed`);
+      }
+      
+      console.log(`Google OAuth successful for user: ${user.email}`);
+      
+      const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
+        expiresIn: '1h',
+      });
+      
+      res.cookie('token', token, cookieOptions);
+      
+      // Redirect to the frontend dashboard
+      res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    } catch (error) {
+      console.error('Error in Google OAuth callback:', error);
+      res.redirect(`${process.env.FRONTEND_URL}/login?error=server_error`);
+    }
   }
 );
 

@@ -8,9 +8,6 @@ const callbackURL = process.env.NODE_ENV === "production"
 
 // Log the callback URL for debugging
 console.log(`Google OAuth Callback URL: ${callbackURL}`);
-console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`BACKEND_URL: ${process.env.BACKEND_URL}`);
-console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`);
 
 passport.use(
   new GoogleStrategy(
@@ -55,3 +52,19 @@ passport.use(
     }
   )
 );
+
+// Required for passport to work properly
+passport.serializeUser((user: any, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id: string, done) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    done(null, user);
+  } catch (error) {
+    done(error, null);
+  }
+});
