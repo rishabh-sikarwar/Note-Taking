@@ -28,4 +28,24 @@ router.get('/test', (req, res) => {
   });
 });
 
+// OAuth debug route to show exact callback URL being used
+router.get('/oauth-config', (req, res) => {
+  const callbackURL = process.env.NODE_ENV === "production" 
+    ? `${process.env.BACKEND_URL}/api/auth/google/callback`
+    : `http://localhost:${process.env.PORT || 8000}/api/auth/google/callback`;
+    
+  res.json({
+    message: 'OAuth Configuration Debug',
+    NODE_ENV: process.env.NODE_ENV,
+    BACKEND_URL: process.env.BACKEND_URL,
+    FRONTEND_URL: process.env.FRONTEND_URL,
+    PORT: process.env.PORT,
+    calculatedCallbackURL: callbackURL,
+    instructions: {
+      message: 'Add this exact URL to your Google Console Authorized redirect URIs:',
+      url: callbackURL
+    }
+  });
+});
+
 export default router;
