@@ -6,8 +6,12 @@ const callbackURL = process.env.NODE_ENV === "production"
   ? `${process.env.BACKEND_URL}/api/auth/google/callback`
   : `http://localhost:${process.env.PORT || 8000}/api/auth/google/callback`;
 
-// Log the callback URL for debugging
-console.log(`Google OAuth Callback URL: ${callbackURL}`);
+// Debug logging
+console.log('Passport Configuration:');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('BACKEND_URL:', process.env.BACKEND_URL);
+console.log('FRONTEND_URL:', process.env.FRONTEND_URL);
+console.log('Generated callbackURL:', callbackURL);
 
 passport.use(
   new GoogleStrategy(
