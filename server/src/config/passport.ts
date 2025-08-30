@@ -2,10 +2,15 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import prisma from "../db.js";
 
-const callbackURL =
-  process.env.NODE_ENV === "production"
-    ? `${process.env.BACKEND_URL}/api/auth/google/callback`
-    : "/api/auth/google/callback";
+const callbackURL = process.env.NODE_ENV === "production" 
+  ? `${process.env.BACKEND_URL}/api/auth/google/callback`
+  : `http://localhost:${process.env.PORT || 8000}/api/auth/google/callback`;
+
+// Log the callback URL for debugging
+console.log(`Google OAuth Callback URL: ${callbackURL}`);
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`BACKEND_URL: ${process.env.BACKEND_URL}`);
+console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`);
 
 passport.use(
   new GoogleStrategy(
