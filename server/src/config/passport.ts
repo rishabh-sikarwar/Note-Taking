@@ -1,7 +1,8 @@
-import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import prisma from "../db.js";
+    import passport from "passport";
+    import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+    import prisma from "../db.js";
 
+<<<<<<< HEAD
 const callbackURL = process.env.NODE_ENV === "production" 
   ? `${process.env.BACKEND_URL}/api/auth/google/callback`
   : `http://localhost:${process.env.PORT || 8000}/api/auth/google/callback`;
@@ -35,20 +36,30 @@ passport.use(
             user = await prisma.user.update({
               where: { email },
               data: { googleId: profile.id },
+=======
+    passport.use(
+      new GoogleStrategy(
+        {
+          clientID: process.env.GOOGLE_CLIENT_ID!,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+          callbackURL: `${process.env.BACKEND_URL}/api/auth/google/callback`,
+        },
+        async (accessToken, refreshToken, profile, done) => {
+          try {
+            const user = await prisma.user.upsert({
+              where: { googleId: profile.id },
+              update: {}, // No updates needed if user exists
+              create: {
+                googleId: profile.id,
+                name: profile.displayName,
+                email: profile.emails![0].value,
+                // Google OAuth doesn't provide DOB, so we use a placeholder.
+                dateOfBirth: null,
+              },
+>>>>>>> parent of 7da21dc (updated the already logged in logic)
             });
-          }
-        } else {
-          // 3. If no user with that email exists, create a new user.
-          user = await prisma.user.create({
-            data: {
-              googleId: profile.id,
-              name: profile.displayName,
-              email: email,
-              dateOfBirth: null,
-            },
-          });
-        }
 
+<<<<<<< HEAD
         return done(null, user);
       } catch (error: any) {
         return done(error, false);
@@ -72,3 +83,12 @@ passport.deserializeUser(async (id: string, done) => {
     done(error, null);
   }
 });
+=======
+            return done(null, user);
+          } catch (error: any) {
+            return done(error, false);
+          }
+        }
+      )
+    );
+>>>>>>> parent of 7da21dc (updated the already logged in logic)
