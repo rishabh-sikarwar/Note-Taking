@@ -12,7 +12,7 @@ export const getNotes = async (req: Request, res: Response) => {
   try {
     const notes = await prisma.note.findMany({
       where: {
-        authorId: req.user.id, // TypeScript now knows req.user is defined
+        authorId: req.user.userId, // TypeScript now knows req.user is defined
       },
       orderBy: {
         createdAt: "desc",
@@ -43,7 +43,7 @@ export const createNote = async (req: Request, res: Response) => {
       data: {
         title,
         content,
-        authorId: req.user.id, // The '!' is no longer needed after the check
+        authorId: req.user.userId, // The '!' is no longer needed after the check
       },
     });
     res.status(201).json(newNote);
@@ -76,7 +76,7 @@ export const deleteNote = async (req: Request, res: Response) => {
     }
 
     // Check if the note belongs to the logged-in user
-    if (note.authorId !== req.user.id) {
+    if (note.authorId !== req.user.userId) {
       return res.status(401).json({ message: "User not authorized" });
     }
 

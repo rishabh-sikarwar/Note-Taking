@@ -6,9 +6,6 @@ import authRoutes from "./routes/authRoutes.js";
 import notesRoutes from "./routes/notesRoutes.js";
 import debugRoutes from "./routes/debugRoutes.js";
 
-import passport from "passport";
-import "./config/passport.js";
-
 // Load environment variables
 dotenv.config();
 
@@ -62,7 +59,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json()); // To parse JSON request bodies
 app.use(cookieParser()); // To parse cookies from requests
-app.use(passport.initialize()); // Initialize Passport.js
 
 // API Routes
 app.use('/api/auth', authRoutes);

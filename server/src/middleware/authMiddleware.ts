@@ -1,7 +1,14 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-// The 'user' property is now properly typed via our types/index.ts file
+// We need to add the 'user' property to the Express Request type
+declare global {
+  namespace Express {
+    interface Request {
+      user?: { userId: string };
+    }
+  }
+}
 
 export const protect = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies.token;
@@ -13,11 +20,11 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
   try {
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
+      userId: string;
     };
 
     // Attach user to the request
-    req.user = { id: decoded.id };
+    req.user = { userId: decoded.userId };
     next(); // Move on to the next function (our controller)
   } catch (error) {
     res.status(401).json({ message: "Not authorized, token failed" });

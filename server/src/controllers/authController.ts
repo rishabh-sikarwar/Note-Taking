@@ -3,13 +3,6 @@ import prisma from "../db.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "../utils/mailer.js";
-import { cookieOptions, logoutCookieOptions } from "../utils/cookieOptions.js";
-
-
-
-
-
-
 
 // Step 1 for Signup: Send OTP
 export const sendSignupOTP = async (req: Request, res: Response) => {
@@ -68,8 +61,8 @@ export const verifySignup = async (req: Request, res: Response) => {
         await prisma.verificationToken.delete({ where: { email } });
         
         // Log the user in
-        const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
-        res.cookie('token', token, cookieOptions);
+        const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET!, { expiresIn: '1h' });
+        res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 3600000 });
         res.status(201).json({ message: 'User created successfully.', user: { name: newUser.name, email: newUser.email } });
 
     } catch (error) {
@@ -130,10 +123,14 @@ export const verifyLoginOTP = async (req: Request, res: Response) => {
     }
 
     await prisma.verificationToken.delete({ where: { email } });
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET!, {
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
       expiresIn: "1h",
     });
-    res.cookie("token", token, cookieOptions);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 3600000,
+    });
     res
       .status(200)
       .json({
@@ -144,35 +141,4 @@ export const verifyLoginOTP = async (req: Request, res: Response) => {
     console.error(error);
     res.status(500).json({ message: "Error during login." });
   }
-};
-
-
-export const getMe = async (req: Request, res: Response) => {
-  if (!req.user) {
-    // This check is theoretically redundant due to the protect middleware, but good for safety
-    return res.status(401).json({ message: "Not authorized" });
-  }
-
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
-      select: { name: true, email: true }, // Only send non-sensitive data
-    });
-
-    if (!user) {
-      // This can happen if the user was deleted but the token is still valid
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    return res.status(200).json(user);
-  } catch (error) {
-    console.error("Error in getMe controller:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-
-
-export const logout = (req: Request, res: Response) => {
-  res.cookie("token", "", logoutCookieOptions);
-  res.status(200).json({ message: "Logged out successfully" });
 };

@@ -21,7 +21,6 @@ model User {
   name      String
   email     String   @unique  
   dateOfBirth DateTime?
-   googleId    String?   @unique
   notes     Note[]
 }
 
