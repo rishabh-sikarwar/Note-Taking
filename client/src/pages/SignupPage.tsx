@@ -60,6 +60,30 @@ const SignupPage = () => {
       <h1 className="text-3xl font-bold mb-2">Sign up</h1>
       <p className="text-gray-500 mb-8">Sign up to enjoy the feature of HD</p>
 
+      {/* Login with Google Button */}
+      <a
+        href={`${
+          import.meta.env.VITE_API_URL || "http://localhost:8000/api"
+        }/auth/google`}
+        className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-md text-gray-700 border border-gray-300 mb-6 bg-white hover:bg-gray-50 transition"
+      >
+        <img
+          src="https://www.svgrepo.com/show/355037/google.svg"
+          alt="Google logo"
+          className="h-5 w-5"
+        />
+        Sign up with Google
+      </a>
+
+      <div className="relative mb-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-300"></div>
+        </div>
+        <div className="relative flex justify-center text-sm">
+          <span className="bg-white px-2 text-gray-500">Or continue with</span>
+        </div>
+      </div>
+
       {step === 1 && (
         <form className="space-y-6" onSubmit={handleSendOTP}>
           <div>

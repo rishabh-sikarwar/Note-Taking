@@ -5,6 +5,9 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import notesRoutes from "./routes/notesRoutes.js";
 import debugRoutes from "./routes/debugRoutes.js";
+import passport from "passport";
+import session from "express-session";
+import "./config/passport.js"; // Ensure passport strategies are configured
 
 // Load environment variables
 dotenv.config();
@@ -59,6 +62,22 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json()); // To parse JSON request bodies
 app.use(cookieParser()); // To parse cookies from requests
+
+// Session middleware MUST come BEFORE passport middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET!, // Add this secret to your .env file
+  resave: false,
+  saveUninitialized: false, // Set to false for login sessions
+  cookie: {
+    secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+    httpOnly: true, // Prevents client-side JS from accessing the cookie
+    maxAge: 1000 * 60 * 60 * 24 * 7 // Cookie expires in 7 days
+  }
+}));
+
+// Initialize Passport and restore authentication state, if any, from the session.
+app.use(passport.initialize());
+app.use(passport.session());
 
 // API Routes
 app.use('/api/auth', authRoutes);

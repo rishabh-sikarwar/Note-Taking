@@ -7,13 +7,11 @@ const callbackURL =
     ? `${process.env.BACKEND_URL}/api/auth/google/callback`
     : `http://localhost:${process.env.PORT || 8000}/api/auth/google/callback`;
 
-// Debug logging
-console.log("Passport Configuration:");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log("BACKEND_URL:", process.env.BACKEND_URL);
-console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+// Debug logging for initial configuration
+console.log("Passport Configuration Loaded");
 console.log("Generated callbackURL:", callbackURL);
 
+// 1. Google Strategy Setup
 passport.use(
   new GoogleStrategy(
     {
@@ -22,52 +20,67 @@ passport.use(
       callbackURL: callbackURL,
     },
     async (accessToken, refreshToken, profile, done) => {
+      console.log("--- Google Strategy Callback Fired ---");
+      console.log("Profile received from Google:", profile);
+
       try {
         const email = profile.emails![0].value;
         let user = await prisma.user.findUnique({
           where: { email },
         });
 
-        // If the user exists and doesn't have a googleId, link it.
+        console.log("User found in DB:", user);
+
         if (user) {
+          // If the user exists but signed up locally first, link their Google ID.
           if (!user.googleId) {
             user = await prisma.user.update({
               where: { email },
               data: { googleId: profile.id },
             });
+            console.log("Linked Google ID to existing user:", user);
           }
           return done(null, user);
         } else {
           // If no user exists with that email, create a new one.
-          user = await prisma.user.create({
+          const newUser = await prisma.user.create({
             data: {
               googleId: profile.id,
               name: profile.displayName,
               email: profile.emails![0].value,
-              dateOfBirth: null, // Using null as a placeholder.
+              dateOfBirth: null, // Placeholder
             },
           });
-          return done(null, user);
+          console.log("New user created:", newUser);
+          return done(null, newUser);
         }
       } catch (error: any) {
+        console.error("!!! ERROR in Google Strategy !!!:", error);
         return done(error, false);
       }
     }
   )
 );
 
-// Required for passport to work properly
+// 2. Session Serialization
 passport.serializeUser((user: any, done) => {
+  console.log("--- Serializing User ---");
+  console.log("User object to serialize:", user);
   done(null, user.id);
 });
 
+// 3. Session Deserialization
 passport.deserializeUser(async (id: string, done) => {
+  console.log("--- Deserializing User ---");
+  console.log("User ID to deserialize:", id);
   try {
     const user = await prisma.user.findUnique({
       where: { id },
     });
+    console.log("User found after deserializing:", user);
     done(null, user);
   } catch (error) {
+    console.error("!!! ERROR in Deserializing User !!!:", error);
     done(error, null);
   }
 });

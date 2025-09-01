@@ -3,7 +3,12 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const ProtectedRoute: React.FC = () => {
-  const { user } = useAuth();
+  const { user , loading} = useAuth();
+
+  // While we are checking for a user, show a loading indicator
+  if (loading) {
+    return <div>Loading...</div>; // Or a fancy spinner component
+  }
 
   // If there's a user, show the nested route (e.g., Dashboard).
   // Otherwise, redirect to the login page.
