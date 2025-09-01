@@ -34,7 +34,6 @@ export const sendSignupOTP = async (req: Request, res: Response) => {
 
 // Step 2 for Signup: Verify OTP and Create User
 export const verifySignup = async (req: Request, res: Response) => {
-  // 1. Removed `password` from the inputs
   const { name, email, otp, dateOfBirth } = req.body;
   try {
     const tokenRecord = await prisma.verificationToken.findUnique({
@@ -67,12 +66,13 @@ export const verifySignup = async (req: Request, res: Response) => {
 
     // Log the user in
     const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 3600000,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      sameSite: "none", // ✨ FIX
     });
     res.status(201).json({
       message: "User created successfully.",
@@ -131,18 +131,18 @@ export const verifyLoginOTP = async (req: Request, res: Response) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      // This should not happen if the login OTP was sent, but it's a good safeguard
       return res.status(404).json({ message: "User not found." });
     }
 
     await prisma.verificationToken.delete({ where: { email } });
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
+      expiresIn: "7d",
     });
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 3600000,
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+      sameSite: "none", // ✨ FIX
     });
     res.status(200).json({
       message: "Logged in successfully.",
@@ -158,14 +158,12 @@ export const googleAuth = passport.authenticate("google", {
   scope: ["profile", "email"],
 });
 
-// Step 2: Google's callback route (UPDATED VERSION)
-
 export const googleAuthCallback = (
   req: Request,
   res: Response,
   next: Function
 ) => {
-  console.log("--- 1. ENTERING GOOGLE CALLBACK CONTROLLER ---"); // Log entry point
+  console.log("--- 1. ENTERING GOOGLE CALLBACK CONTROLLER ---");
 
   passport.authenticate(
     "google",
@@ -173,7 +171,7 @@ export const googleAuthCallback = (
       session: false,
     },
     (err: any, user: any, info: any) => {
-      console.log("--- 2. PASSPORT AUTHENTICATE CUSTOM CALLBACK FIRED ---"); // Log when passport's callback runs
+      console.log("--- 2. PASSPORT AUTHENTICATE CUSTOM CALLBACK FIRED ---");
 
       if (err) {
         console.error("Authentication framework error:", err);
@@ -191,22 +189,19 @@ export const googleAuthCallback = (
       console.log("--- 3. USER AUTHENTICATED SUCCESSFULLY ---");
       console.log("User object:", user);
 
-      // Create the JWT
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
         expiresIn: "7d",
       });
       console.log("--- 4. JWT CREATED ---");
 
-      // Set the JWT in an httpOnly cookie
       res.cookie("token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: "lax",
+        sameSite: "none", // ✨ FIX: Was 'lax'
       });
       console.log("--- 5. COOKIE HAS BEEN SET ---");
 
-      // Redirect the user to the frontend dashboard
       console.log("--- 6. REDIRECTING TO DASHBOARD ---");
       res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
     }
@@ -215,12 +210,8 @@ export const googleAuthCallback = (
 
 export const getMe = async (req: Request, res: Response) => {
   try {
-    // If the 'protect' middleware passed, it attached the user's ID to req.user
-    // We use that ID to find the user in the database.
     const user = await prisma.user.findUnique({
       where: { id: req.user!.id },
-      // IMPORTANT: Only select the data you want to send to the frontend.
-      // Never send back sensitive information.
       select: {
         id: true,
         name: true,
@@ -232,7 +223,6 @@ export const getMe = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // Send the user data back to the frontend
     res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching user:", error);
