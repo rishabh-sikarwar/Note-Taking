@@ -89,6 +89,11 @@ app.get("/api/health", (req, res) => {
   res.send("Server is healthy!");
 });
 
+
+app.get("/api/version", (req, res) => {
+  res.json({ version: "1.1.0" }); // A simple version number
+});
+
 // Global error handlers
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error);
