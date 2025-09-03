@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendOTPEmail } from "../utils/mailer.js";
 import passport from "passport";
+import { cookieOptions , logoutCookieOptions } from "../utils/cookieOptions.js";
 
 // Step 1 for Signup: Send OTP
 export const sendSignupOTP = async (req: Request, res: Response) => {
@@ -66,14 +67,9 @@ export const verifySignup = async (req: Request, res: Response) => {
 
     // Log the user in
     const token = jwt.sign({ userId: newUser.id }, process.env.JWT_SECRET!, {
-      expiresIn: "7d",
+      expiresIn: "1h",
     });
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      sameSite: "none", // ✨ FIX
-    });
+    res.cookie("token", token, cookieOptions);
     res.status(201).json({
       message: "User created successfully.",
       user: { name: newUser.name, email: newUser.email },
@@ -136,18 +132,9 @@ export const verifyLoginOTP = async (req: Request, res: Response) => {
 
     await prisma.verificationToken.delete({ where: { email } });
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "7d",
+      expiresIn: "1h",
     });
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-      sameSite: "none", // ✨ FIX
-    });
-    res.status(200).json({
-      message: "Logged in successfully.",
-      user: { name: user.name, email: user.email },
-    });
+    res.cookie("token", token, cookieOptions);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error during login." });
@@ -194,12 +181,7 @@ export const googleAuthCallback = (
       });
       console.log("--- 4. JWT CREATED ---");
 
-      res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-        sameSite: "none", // ✨ FIX: Was 'lax'
-      });
+      res.cookie("token", token, cookieOptions);
       console.log("--- 5. COOKIE HAS BEEN SET ---");
 
       console.log("--- 6. REDIRECTING TO DASHBOARD ---");
@@ -228,4 +210,9 @@ export const getMe = async (req: Request, res: Response) => {
     console.error("Error fetching user:", error);
     res.status(500).json({ message: "Server error." });
   }
+};
+
+export const logout = (req: Request, res: Response) => {
+  res.cookie("token", "", logoutCookieOptions); // Use the imported logout options
+  res.status(200).json({ message: "Logged out successfully" });
 };
